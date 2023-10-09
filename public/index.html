@@ -16,9 +16,9 @@
     <!-- This is an A11y Change -->
     <nav class="menu" role="navigation">
         <ul>
-            <li><a href="">Homepage</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="login.html">Login</a></li>
+            <li><a href="/">Homepage</a></li>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/login.html">Login</a></li>
             <!-- This is an SEO Change -->
             <li><a rel="canonical" href="https://google.com">Google</a></li>
         </ul>
@@ -134,16 +134,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <script>
+        
       var dataSource = {
         datasets: [
           {
             data: [],
-            backgroundColor: [
-              '#ffcd56',
-              '#ff6384',
-              '#36a2eb',
-              '#fd6b19'
-            ]
+            backgroundColor: []
           }
         ],
         labels: []
@@ -152,11 +148,12 @@
       const ctx = document.getElementById('myChart');
 
       function getBudget() {
-        axios.get('http://localhost:3000/budget')
+        axios.get('http://localhost:3000/budgets')
         .then(function (res) {
-            for(var i = 0; i < res.data.myBudget.length; i++) {
-                dataSource.datasets[0].data[i] = res.data.myBudget[i].budget
-                dataSource.labels[i] = res.data.myBudget[i].title;
+            for(var i = 0; i < res.data.length; i++) {
+                dataSource.datasets[0].data[i] = res.data[i].budget
+                dataSource.labels[i] = res.data[i].title;
+                dataSource.datasets[0].backgroundColor[i] = res.data[i].color
             }
             new Chart(ctx, {
                 type: 'pie',
@@ -172,10 +169,13 @@
     <script>
 
     function getBudget() {
-        axios.get('http://localhost:3000/budget')
+        axios.get('http://localhost:3000/budgets')
         .then(function (res) {
-            var data = res.data.myBudget
-            console.log("top-level data: " + JSON.stringify(data))
+            colorRange = []
+            res.data.forEach(budgetItem => {
+                colorRange.push(budgetItem.color)
+            });
+            var data = res.data
             var width = 700;
             const height = width * 0.6;
             var svg = d3.select(".d3-container")
@@ -208,7 +208,7 @@
 
             var color = d3.scaleOrdinal()
                 .domain(data.map(d => d.title))
-                .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+                .range(colorRange);
 
 
             change(data);
